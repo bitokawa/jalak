@@ -1,0 +1,56 @@
+[workspace]
+members = ["apps/desktop"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+rust-version = "1.95"
+
+[workspace.dependencies]
+anyhow = "=1.0.100"
+block2 = "=0.6.2"
+directories = "=6.0.0"
+gpui-kit = "=0.6.1"
+objc2 = "=0.6.4"
+objc2-app-kit = { version = "=0.3.2", default-features = false, features = [
+  "NSAlert",
+  "NSApplication",
+  "NSButton",
+  "NSControl",
+  "NSEvent",
+  "NSImage",
+  "NSResponder",
+  "NSRunningApplication",
+  "NSScreen",
+  "NSStatusBar",
+  "NSStatusBarButton",
+  "NSStatusItem",
+  "NSTextField",
+  "NSView",
+  "NSWindow",
+  "block2",
+  "objc2-core-foundation",
+] }
+objc2-foundation = { version = "=0.3.2", default-features = false, features = [
+  "NSArray",
+  "NSDictionary",
+  "NSGeometry",
+  "NSObject",
+  "NSString",
+] }
+rodio = { version = "=0.22.2", default-features = false, features = [
+  "playback",
+  "flac",
+  "mp3",
+  "mp4",
+  "vorbis",
+  "wav",
+] }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.145"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
