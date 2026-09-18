@@ -21,6 +21,7 @@
 - Management rows show each sound's file path with play/pause preview and
   volume controls instead of its file size.
 - Jalak now follows the macOS light and dark appearance.
+- New app icon, generated from a PNG master instead of the previous SVG.
 - Raised the minimum supported Rust version to 1.95.
 - Configuration files, managed audio, and playback behavior are unchanged.
 
