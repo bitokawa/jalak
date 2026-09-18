@@ -23,10 +23,9 @@
 - Jalak now follows the macOS light and dark appearance.
 - New app icon, generated from a PNG master instead of the previous SVG.
 - Raised the minimum supported Rust version to 1.95.
-- Configuration files, managed audio, and playback behavior are unchanged.
-
 - Resuming a profile restarts each sound from a random position instead of
   replaying the same passage every time.
+- Configuration files, managed audio, and playback behavior are unchanged.
 
 ### Fixed
 
