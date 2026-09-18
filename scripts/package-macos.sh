@@ -6,14 +6,31 @@ repo_root=${script_dir:h}
 bundle="$repo_root/target/Jalak.app"
 icon_work="$repo_root/target/jalak-icon"
 iconset="$repo_root/target/AppIcon.iconset"
+binary="$bundle/Contents/MacOS/jalak-desktop"
 
 cd "$repo_root"
-cargo build --workspace --release
+version=$(cargo pkgid -p jalak-desktop | sed 's/.*[#@]//')
+
+# JALAK_UNIVERSAL=1 builds an arm64 + x86_64 binary (needs both rustup targets).
+if [[ -n ${JALAK_UNIVERSAL:-} ]]; then
+  cargo build --workspace --release --target aarch64-apple-darwin
+  cargo build --workspace --release --target x86_64-apple-darwin
+else
+  cargo build --workspace --release
+fi
 
 rm -rf "$bundle" "$icon_work" "$iconset"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources" "$icon_work" "$iconset"
-cp "$repo_root/target/release/jalak-desktop" "$bundle/Contents/MacOS/jalak-desktop"
+if [[ -n ${JALAK_UNIVERSAL:-} ]]; then
+  lipo -create -output "$binary" \
+    "$repo_root/target/aarch64-apple-darwin/release/jalak-desktop" \
+    "$repo_root/target/x86_64-apple-darwin/release/jalak-desktop"
+else
+  cp "$repo_root/target/release/jalak-desktop" "$binary"
+fi
 cp "$repo_root/apps/desktop/resources/Info.plist" "$bundle/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $version" "$bundle/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $version" "$bundle/Contents/Info.plist"
 printf 'APPL????' > "$bundle/Contents/PkgInfo"
 
 qlmanage -t -s 1024 -o "$icon_work" "$repo_root/apps/desktop/resources/AppIcon.svg" >/dev/null 2>&1
@@ -33,4 +50,4 @@ iconutil -c icns "$iconset" -o "$bundle/Contents/Resources/AppIcon.icns"
 codesign --force --deep --sign - "$bundle"
 plutil -lint "$bundle/Contents/Info.plist"
 codesign --verify --deep --strict "$bundle"
-print "Built $bundle"
+print "Built $bundle ($version)"
