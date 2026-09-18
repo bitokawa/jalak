@@ -24,6 +24,12 @@
 - Raised the minimum supported Rust version to 1.95.
 - Configuration files, managed audio, and playback behavior are unchanged.
 
+- Resuming a profile restarts each sound from a random position instead of
+  replaying the same passage every time.
+
 ### Fixed
 
+- Resuming a profile reopens the audio output device, so playback recovers
+  after macOS tears the previous output down on sleep or a device change.
+  Jalak previously kept the dead output and played silence until relaunched.
 - Prevented reentrant popup teardown when opening Manage Profiles.

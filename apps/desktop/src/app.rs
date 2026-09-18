@@ -197,14 +197,15 @@ impl AppState {
             config.profile_paused = !config.profile_paused;
             Ok(())
         })?;
-        self.audio
-            .set_profile_paused(self.config.active_profile(), self.config.profile_paused);
+        if self.config.profile_paused {
+            self.audio
+                .set_profile_paused(self.config.active_profile(), true);
+        } else {
+            // Resuming rebuilds on a freshly opened device, which is what
+            // recovers playback after macOS tore the previous output down.
+            self.restart_active();
+        }
         Ok(())
-    }
-
-    pub fn retry_audio(&mut self) {
-        self.audio.retry_output();
-        self.sync_active();
     }
 
     pub fn active_profile(&self) -> &Profile {
@@ -230,11 +231,25 @@ impl AppState {
     }
 
     fn sync_active(&mut self) {
-        match self.audio.sync_profile(
+        let result = self.audio.sync_profile(
             self.config.active_profile(),
             &self.store.paths.audio,
             self.config.profile_paused,
-        ) {
+        );
+        self.record_sync(result);
+    }
+
+    fn restart_active(&mut self) {
+        let result = self.audio.restart_profile(
+            self.config.active_profile(),
+            &self.store.paths.audio,
+            self.config.profile_paused,
+        );
+        self.record_sync(result);
+    }
+
+    fn record_sync(&mut self, result: Result<HashMap<u64, String>>) {
+        match result {
             Ok(errors) => {
                 self.track_errors = errors;
                 self.last_error = None;
