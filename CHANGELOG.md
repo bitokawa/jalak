@@ -22,6 +22,8 @@
   volume controls instead of its file size.
 - Jalak now follows the macOS light and dark appearance.
 - New app icon, generated from a PNG master instead of the previous SVG.
+- The menu-bar item shows the jalak logo as a template image instead of a
+  music-note glyph, tinted to match the menu bar appearance.
 - Raised the minimum supported Rust version to 1.95.
 - Resuming a profile restarts each sound from a random position instead of
   replaying the same passage every time.

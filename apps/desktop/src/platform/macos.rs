@@ -10,13 +10,15 @@ use gpui_kit::{
 };
 use objc2::rc::Retained;
 use objc2::runtime::NSObjectProtocol;
-use objc2::{DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send, sel};
+use objc2::{
+    AnyThread, DefinedClass, MainThreadMarker, MainThreadOnly, define_class, msg_send, sel,
+};
 use objc2_app_kit::{
     NSAlert, NSAlertFirstButtonReturn, NSApplication, NSApplicationActivationPolicy, NSControl,
-    NSEvent, NSEventMask, NSScreen, NSSquareStatusItemLength, NSStatusBar, NSStatusItem,
+    NSEvent, NSEventMask, NSImage, NSScreen, NSSquareStatusItemLength, NSStatusBar, NSStatusItem,
     NSTextField,
 };
-use objc2_foundation::{NSObject, NSPoint, NSRect, NSSize, NSString};
+use objc2_foundation::{NSData, NSObject, NSPoint, NSRect, NSSize, NSString};
 
 use crate::{
     app::AppState,
@@ -79,7 +81,8 @@ pub fn install(cx: &mut App, state: Entity<AppState>) -> Result<()> {
 
     let item = NSStatusBar::systemStatusBar().statusItemWithLength(NSSquareStatusItemLength);
     let button = item.button(mtm).context("status item has no button")?;
-    button.setTitle(&NSString::from_str("♫"));
+    let icon = menu_icon()?;
+    button.setImage(Some(&icon));
     button.setToolTip(Some(&NSString::from_str("Jalak audio profiles")));
 
     let async_app = cx.to_async();
@@ -119,6 +122,16 @@ pub fn install(cx: &mut App, state: Entity<AppState>) -> Result<()> {
         management: None,
     });
     Ok(())
+}
+
+/// Template image: AppKit tints it to match the menu bar's light or dark appearance.
+fn menu_icon() -> Result<Retained<NSImage>> {
+    let data = NSData::with_bytes(include_bytes!("../../resources/MenuIcon.png"));
+    let image =
+        NSImage::initWithData(NSImage::alloc(), &data).context("menu icon is not a valid image")?;
+    image.setSize(NSSize::new(18.0, 18.0));
+    image.setTemplate(true);
+    Ok(image)
 }
 
 pub fn show_management_on_reopen(cx: &mut App) {
