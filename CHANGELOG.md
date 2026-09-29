@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 - 2026-09-29
+
 ### Added
 
 - macOS menu-bar audio profiles with concurrent looping local tracks.
