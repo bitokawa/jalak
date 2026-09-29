@@ -4,6 +4,13 @@
 
 ## 0.2.0 - 2026-09-29
 
+Jalak 0.2 is the first packaged release: a menu-bar app that loops your own
+ambient sounds as profiles, each with per-track volume and mute. The popup
+and management window are rebuilt, follow the macOS light and dark
+appearance, and wear a new icon and a jalak menu-bar logo. Resuming a profile
+now starts each sound somewhere new and recovers audio after sleep or a
+device change instead of playing silence.
+
 ### Added
 
 - macOS menu-bar audio profiles with concurrent looping local tracks.

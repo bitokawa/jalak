@@ -66,18 +66,26 @@ jobs:
           VERSION: ${{ steps.meta.outputs.version }}
           ZIP: ${{ steps.archive.outputs.zip }}
         run: |
-          awk -v h="## $VERSION " 'index($0, h) == 1 {f=1; next} /^## /{f=0} f' CHANGELOG.md > notes.md
-          cat >> notes.md <<'EOF'
-
-          ## Install
-
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/$ZIP"
+          # Latest published release, read before this one exists.
+          prev=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName 2>/dev/null || true)
+          {
+            awk -v h="## $VERSION " 'index($0, h) == 1 {f=1; next} f && /^##/{exit} f' CHANGELOG.md
+            printf '**Download Jalak:** [Mac (Apple silicon and Intel)](%s)\n\n' "$url"
+            cat <<'EOF'
           Unzip, move `Jalak.app` to `/Applications`, then clear the download
           quarantine (the app is not notarized):
 
           ```bash
           xattr -dr com.apple.quarantine /Applications/Jalak.app
           ```
+
           EOF
+            awk -v h="## $VERSION " 'index($0, h) == 1 {f=1; next} /^## /{f=0} f && /^### /{p=1} f && p' CHANGELOG.md
+            if [[ -n "$prev" ]]; then
+              printf '\n**Full changelog**: https://github.com/%s/compare/%s...%s\n' "$GITHUB_REPOSITORY" "$prev" "$GITHUB_REF_NAME"
+            fi
+          } > notes.md
           gh release create "$GITHUB_REF_NAME" "$ZIP" "$ZIP.sha256" \
             --repo "$GITHUB_REPOSITORY" --verify-tag \
             --title "Jalak $GITHUB_REF_NAME" --notes-file notes.md
